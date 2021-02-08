@@ -1,2 +1,2 @@
 # metronome
-A simple metronome written in Python. Adjustable time-signature.
+A simple metronome written in Python for any time-signature.
