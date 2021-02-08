@@ -7,40 +7,29 @@ Created on Mon Feb  1 17:52:44 2021
 """
 
 import numpy as np
+import scipy.io.wavfile as wavfile
 import matplotlib.pyplot as plt
 import sounddevice as snd
 
-bpm = 120
+bpm = 200
 interval = 60/bpm
-samplerate = 44100
-duration = 100*10**(-3) #ms
-time_axis = np.linspace(0,duration,int(duration*samplerate))
 
-# gets rid of extremal transients
-width = 0.007
-square_wave = np.zeros_like(time_axis)
-square_wave[int((duration/2-width)*samplerate):int((duration/2+width)*samplerate)]=1
+samplerate, primary_click = wavfile.read('primary.wav')
+primary_click = primary_click[:,0]
+secondary_click = wavfile.read('secondary.wav')[1]
+secondary_click = secondary_click[:,0]
 
-# attack
-left_edge = np.sin(np.pi*(time_axis+width)/duration)**20
-left_edge[int((duration/2-width)*samplerate):]=0
+time_sig = [4,4]
+N_measure = int(4*samplerate*interval*(time_sig[0]/time_sig[1]))
+N_beat = int(N_measure/time_sig[0])
+measure = np.zeros(N_measure)
 
-# release
-right_edge = np.sin(np.pi*(time_axis-width)/duration)**100
-right_edge[:int((duration/2+width)*samplerate)]=0
+measure[:primary_click.size] = primary_click
+for i in range(1,time_sig[0]):
+    measure[i*N_beat:i*N_beat+secondary_click.size] = secondary_click
 
-volume_envelope = square_wave + left_edge + right_edge
-plt.plot(volume_envelope)
-plt.show()
-
-primary_frequency = 880
-primary_click = np.sin(2*np.pi*primary_frequency*time_axis)*volume_envelope
-
-secondary_frequency = 440
-secondary_click = np.sin(2*np.pi*secondary_frequency*time_axis)*volume_envelope
-
-while True:
-    snd.play(primary_click)
-    for i in range(4):
-        plt.pause(interval)
-        snd.play(secondary_click)
+measure = measure/np.max(measure)
+metro = np.tile(measure, 64)
+# main loop
+snd.play(metro)
+snd.wait()
