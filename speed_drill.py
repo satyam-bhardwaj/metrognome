@@ -16,7 +16,7 @@ primary_click = primary_click[:,0]
 secondary_click = wavfile.read('secondary.wav')[1]
 secondary_click = secondary_click[:,0]
 
-time_sig = [4,4]
+time_sig = [7,8]
 for bpm in range(100,200,2):
     print(bpm)
     N_measure = int(4*samplerate*(60/bpm)*(time_sig[0]/time_sig[1]))
