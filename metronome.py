@@ -8,7 +8,6 @@ Created on Mon Feb  1 17:52:44 2021
 
 import numpy as np
 import scipy.io.wavfile as wavfile
-import matplotlib.pyplot as plt
 import sounddevice as snd
 
 bpm = 200
