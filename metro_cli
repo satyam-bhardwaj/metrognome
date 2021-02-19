@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Feb 19 16:18:51 2021
+
+@author: Satyam Bhardwaj
+"""
+import sys
+import numpy as np
+import scipy.io.wavfile as wavfile
+import sounddevice as snd
+
+
+def metronome(volume, speed_drill_mode, numerator, subdivision, bpm_start, *args):
+    
+    if len(args)==3:
+        bpm_target = args[0]
+        increment = args[1]
+        hold_for = args[2]
+    elif len(args) < 3 and len(args) != 0:
+        raise ValueError('Too few arguments.')
+    elif len(args) > 3:
+        raise ValueError('Too many arguments.')
+        
+    samplerate, primary_click = wavfile.read('primary.wav')
+    primary_click = primary_click[:,0]
+    secondary_click = wavfile.read('secondary.wav')[1]
+    secondary_click = secondary_click[:,0]
+    time_sig = [numerator, subdivision]
+    
+    if speed_drill_mode == 0:
+        print('Fixed BPM mode: ',bpm_start,' BPM     Time Signature ',numerator
+              ,'/',subdivision)
+        
+        interval = 60/bpm_start
+        
+        N_measure = int(4*samplerate*interval*(time_sig[0]/time_sig[1]))
+        N_beat = int(N_measure/time_sig[0])
+        measure = np.zeros(N_measure)
+        
+        measure[:primary_click.size] = primary_click
+        for i in range(1,time_sig[0]):
+            measure[i*N_beat:i*N_beat+secondary_click.size] = secondary_click
+        
+        measure = volume*measure/np.max(measure)
+        metro = np.tile(measure, 128)
+        snd.play(metro)
+        snd.wait()
+
+    else:
+        print('Speed Drill mode: From',bpm_start,'BPM to',bpm_target,'BPM, in increments of',increment,'every',hold_for,'bar.  \nTime Signature ',numerator
+              ,'/',subdivision)
+        if (bpm_start > bpm_target and increment > 0) or (bpm_start < bpm_target 
+                                                          and increment < 0):
+            raise ValueError('Incompatible Values.')
+        
+        for bpm in range(bpm_start, bpm_target + increment, increment):
+            print('Current BPM: ',bpm)
+            interval = 60/bpm
+            N_measure = int(4*samplerate*interval*(time_sig[0]/time_sig[1]))
+            N_beat = int(N_measure/time_sig[0])
+            measure = np.zeros(N_measure)
+            
+            measure[:primary_click.size] = primary_click
+            for i in range(1,time_sig[0]):
+                measure[i*N_beat:i*N_beat+secondary_click.size] = secondary_click
+            
+            measure = volume*measure/np.max(measure)
+            metro = np.tile(measure, hold_for)
+            snd.play(metro)
+            snd.wait()
+        metro = np.tile(measure, 128)
+        snd.play(metro)
+        snd.wait()
+            
+if __name__ == "__main__":
+    flag = 0
+    volume            = float(sys.argv[1])
+    speed_drill_mode  = int(sys.argv[2])
+    numerator         = int(sys.argv[3])
+    subdivision       = int(sys.argv[4])
+    bpm_start         = int(sys.argv[5])
+    if int(sys.argv[2]) == 1:
+        flag = 1
+        bpm_target        = int(sys.argv[6]) 
+        increment         = int(sys.argv[7])
+        hold_for          = int(sys.argv[8])
+    
+    if flag == 0:
+        metronome(volume, speed_drill_mode, numerator, subdivision, bpm_start)
+    else:
+        metronome(volume, speed_drill_mode, numerator, subdivision, bpm_start, bpm_target, 
+              increment, hold_for)
+        
+    

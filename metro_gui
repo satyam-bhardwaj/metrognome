@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jan 27 01:06:01 2021
+
+@author: Satyam Bhardwaj
+"""
+import subprocess
+
+from gi import require_version
+require_version('Gtk', '3.0')
+from gi.repository import Gtk
+
+def main_exit(arg1, arg2):
+    try:
+        process.kill()
+        Gtk.main_quit()
+    except:
+        Gtk.main_quit()
+        
+builder = Gtk.Builder()
+builder.add_from_file("gui.glade")
+window = builder.get_object("main_window")
+window.connect("delete-event", main_exit)
+speed_drill_settings = builder.get_object("speed_drill_settings")
+
+stopped = True
+    
+def startstop(widget):
+    global stopped
+    global process
+    if stopped:
+        volume = str(builder.get_object("volume_button").get_value()**2)
+        speed_drill_mode = str(int(builder.get_object("speed_drill_mode").get_state()))
+        numerator = builder.get_object("numerator").get_text()
+        subdivision = builder.get_object("subdivision").get_text()
+        bpm_start = builder.get_object("bpm_start").get_text()
+        if speed_drill_mode == '1':    
+            bpm_target = builder.get_object("bpm_target").get_text()
+            increment = builder.get_object("increment").get_text()
+            hold_for = builder.get_object("hold_for").get_text()
+            command_list = ['./metro_cli', volume, speed_drill_mode, numerator, 
+                            subdivision, bpm_start, bpm_target, increment, hold_for]
+        else:
+            command_list = ['./metro_cli', volume, speed_drill_mode, numerator, 
+                            subdivision, bpm_start]
+        process = subprocess.Popen(command_list)
+        stopped = False
+    else:
+        process.kill()
+        stopped = True
+
+def speed_drill_mode_activate(*args):
+    if speed_drill_settings.is_visible() == False:    
+        speed_drill_settings.show()
+    else:
+        speed_drill_settings.hide()
+    
+handlers = {
+    "startstop": startstop, 
+    "speed_drill_mode_active_notify": speed_drill_mode_activate
+    }
+builder.connect_signals(handlers)
+
+window.show_all()
+speed_drill_settings.hide()
+Gtk.main()
