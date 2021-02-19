@@ -4,7 +4,7 @@ A simple metronome written in Python using GTK. Requires Python 3.9.1 and some d
 New in v0.0:
 * Change Time-Signature to any arbitrary fraction
 * Speed Drill: Allows you to gradually increase or decrease the BPM to a target value
-* Adjustable Volume
+* Adjustable Volume (while stopped)
 
 Features planned for future releases:
 * Fix slight timing error introduced due to `sounddevice.wait()`. This also fixes auto-stop after 128 bars and reduces RAM usage drastically.
