@@ -1,5 +1,5 @@
 # MetroGnome
-A simple metronome written in Python using GTK.
+A simple metronome written in Python using GTK. Requires Python 3.9.1 and some distribution of Linux.
 
 New in v0.0:
 * Change Time-Signature to any arbitrary fraction
