@@ -12,7 +12,7 @@ Features planned for future releases:
 
 To install and run, execute the following (skip packages if already installed)
 ```
-pip install numpy scipy sounddevice gobject
+pip install numpy scipy sounddevice pygobject
 git clone git@github.com:satyam-bhardwaj/metrognome.git
 cd metrognome/
 chmod +x metro_gui
